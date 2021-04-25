@@ -16,6 +16,18 @@ let remoteStream = null;
 let roomDialog = null;
 let roomId = null;
 
+//start data transfer vars
+
+let sendChannel = null;
+
+const dataChannelSend = document.querySelector("textarea#dataChannelSend");
+const dataChannelReceive = document.querySelector(
+  "textarea#dataChannelReceive"
+);
+const sendButton = document.querySelector("button#sendButton");
+const closeButton = document.querySelector("button#closeButton");
+//end data transfer vars
+
 //---------------------
 
 function init() {
@@ -24,6 +36,8 @@ function init() {
   document.querySelector("#createBtn").addEventListener("click", createRoom);
   document.querySelector("#joinBtn").addEventListener("click", joinRoom);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector("#room-dialog"));
+
+  sendButton.onclick = sendData;
 }
 
 //---------------------
@@ -41,6 +55,10 @@ async function createRoom() {
   console.log("Create PeerConnection with configuration: ", configuration);
   peerConnection = new RTCPeerConnection(configuration);
   //creating peer connection object, passing config
+
+  sendChannel = peerConnection.createDataChannel("sendDataChannel");
+
+  peerConnection.ondatachannel = receiveChannelCallback;
 
   registerPeerConnectionListeners();
   //function that sets up loggin various signaling/ice state changes
@@ -132,6 +150,9 @@ async function createRoom() {
   //end code for listening for remote ICE candidates
 
   //end code for handling incoming remote "join" requests
+
+  sendChannel.onopen = onSendChannelStateChange;
+  sendChannel.onclose = onSendChannelStateChange;
 }
 
 //---------------------
@@ -174,6 +195,11 @@ async function joinRoomById(roomId) {
   if (roomSnapshot.exists) {
     console.log("Create PeerConnection with configuration: ", configuration);
     peerConnection = new RTCPeerConnection(configuration);
+
+    sendChannel = peerConnection.createDataChannel("sendDataChannel");
+
+    peerConnection.ondatachannel = receiveChannelCallback;
+
     registerPeerConnectionListeners();
     localStream.getTracks().forEach((track) => {
       peerConnection.addTrack(track, localStream);
@@ -229,6 +255,9 @@ async function joinRoomById(roomId) {
     });
     //end code for listening for remote ICE candidates
   }
+
+  sendChannel.onopen = onSendChannelStateChange;
+  sendChannel.onclose = onSendChannelStateChange;
 }
 
 //---------------------
@@ -328,3 +357,44 @@ function registerPeerConnectionListeners() {
 //---------------------
 
 init();
+
+//start data transfer helper functions
+
+function onSendChannelStateChange() {
+  const readyState = sendChannel.readyState;
+  console.log("Send channel state is: " + readyState);
+  if (readyState === "open") {
+    dataChannelSend.disabled = false;
+    dataChannelSend.focus();
+    sendButton.disabled = false;
+    closeButton.disabled = false;
+  } else {
+    dataChannelSend.disabled = true;
+    sendButton.disabled = true;
+    closeButton.disabled = true;
+  }
+}
+
+function receiveChannelCallback(event) {
+  console.log("Receive Channel Callback");
+  receiveChannel = event.channel;
+  receiveChannel.onmessage = onReceiveMessageCallback;
+  receiveChannel.onopen = onReceiveChannelStateChange;
+  receiveChannel.onclose = onReceiveChannelStateChange;
+}
+
+function onReceiveMessageCallback(event) {
+  console.log("Received Message");
+  dataChannelReceive.value = event.data;
+}
+
+function onReceiveChannelStateChange() {
+  const readyState = receiveChannel.readyState;
+  console.log(`Receive channel state is: ${readyState}`);
+}
+
+function sendData() {
+  const data = dataChannelSend.value;
+  sendChannel.send(data);
+  console.log("Sent Data: " + data);
+}
