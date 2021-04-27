@@ -265,8 +265,26 @@ async function joinRoomById(roomId) {
 async function openUserMedia(e) {
   const stream = await navigator.mediaDevices.getUserMedia({
     video: true,
-    audio: true,
+    audio: {
+      //for chrome
+      mandatory: {
+        // autoGainControl: "false",
+        echoCancellation: "true", //I think this needs to be set to true
+        googAutoGainControl: "false", //not sure about this one
+        googEchoCancellation: "true", //I think this needs to be set to true
+        googNoiseSuppression: "false", //sounds better set to false
+        googHighpassFilter: "true",
+      },
+      optional: [],
+      //for ff
+      // audio : {
+      //   "mandatory": {
+      //       "echoCancellation": "true"
+      //   }
+      // }
+    },
   });
+  console.log(stream.getAudioTracks()[0].getSettings());
   //video and audio stream from local device
 
   document.querySelector("#localVideo").srcObject = stream;
@@ -281,7 +299,7 @@ async function openUserMedia(e) {
   document.querySelector("#remoteVideo").srcObject = remoteStream;
   //adding remote (incoming) stream to other html video element
 
-  console.log("Stream:", document.querySelector("#localVideo").srcObject);
+  // console.log("Stream:", document.querySelector("#localVideo").srcObject);
   document.querySelector("#cameraBtn").disabled = true;
   document.querySelector("#joinBtn").disabled = false;
   document.querySelector("#createBtn").disabled = false;
