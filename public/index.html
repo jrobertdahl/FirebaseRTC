@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Welcome to FirebaseRTC</title>
+    <title>Lesson Demo</title>
     <link
       href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
       rel="stylesheet"
@@ -24,7 +24,6 @@
     <link rel="stylesheet" type="text/css" href="main.css" />
   </head>
   <body>
-    <h1>Welcome to FirebaseRTC!</h1>
     <div id="buttons">
       <button class="mdc-button mdc-button--raised" id="cameraBtn">
         <i class="material-icons mdc-button__icon" aria-hidden="true"
@@ -46,37 +45,35 @@
         <i class="material-icons mdc-button__icon" aria-hidden="true">close</i>
         <span class="mdc-button__label">Hangup</span>
       </button>
-    </div>
-    <div>
-      <span id="currentRoom"></span>
-    </div>
-    <div id="videos">
-      <video id="localVideo" muted autoplay playsinline></video>
-      <video id="remoteVideo" autoplay playsinline></video>
+      <div>
+        <span id="currentRoom"></span>
+      </div>
     </div>
 
-    <h1>
-      <span>Transmit text</span>
-    </h1>
+    <div id="video-container-outer">
+      <div id="video-container-inner">
+        <video id="localVideo" muted autoplay playsinline></video>
+        <video id="remoteVideo" autoplay playsinline></video>
+      </div>
+    </div>
 
-    <div id="buttons">
+    <!-- <div id="buttons">
       <button id="sendButton">Send</button>
-      <button id="closeButton">Stop</button>
     </div>
 
     <div id="sendReceive">
       <div id="send">
-        <h2>Send</h2>
+        <h2>Send text</h2>
         <textarea
           id="dataChannelSend"
           placeholder="Press Start, enter some text, then press Send."
         ></textarea>
       </div>
       <div id="receive">
-        <h2>Receive</h2>
+        <h2>Receive text</h2>
         <textarea id="dataChannelReceive"></textarea>
       </div>
-    </div>
+    </div> -->
 
     <div
       class="mdc-dialog"

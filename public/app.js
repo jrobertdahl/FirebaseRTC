@@ -37,7 +37,7 @@ function init() {
   document.querySelector("#joinBtn").addEventListener("click", joinRoom);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector("#room-dialog"));
 
-  sendButton.onclick = sendData;
+  // sendButton.onclick = sendData;
 }
 
 //---------------------
