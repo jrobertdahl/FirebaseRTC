@@ -1,25 +1,14 @@
+import { userMediaAudio } from "./userMediaAudio.js";
+
+console.log(userMediaAudio);
+
 export async function openUserMedia() {
   const stream = await navigator.mediaDevices.getUserMedia({
     video: true,
-    audio: {
-      //for chrome
-      mandatory: {
-        // autoGainControl: "false",
-        echoCancellation: "true", //I think this needs to be set to true
-        googAutoGainControl: "false", //not sure about this one
-        googEchoCancellation: "true", //I think this needs to be set to true
-        googNoiseSuppression: "false", //sounds better set to false
-        googHighpassFilter: "true",
-      },
-      optional: [],
-      //for ff
-      // audio : {
-      //   "mandatory": {
-      //       "echoCancellation": "true"
-      //   }
-      // }
-    },
+    audio: userMediaAudio,
   });
+
+  console.log(stream);
 
   return stream;
 }
