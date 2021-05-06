@@ -25,26 +25,27 @@
   </head>
   <body>
     <div id="buttons">
-      <button class="mdc-button mdc-button--raised" id="cameraBtn">
-        <i class="material-icons mdc-button__icon" aria-hidden="true"
-          >perm_camera_mic</i
-        >
-        <span class="mdc-button__label">Open camera & microphone</span>
-      </button>
-      <button class="mdc-button mdc-button--raised" disabled id="createBtn">
-        <i class="material-icons mdc-button__icon" aria-hidden="true"
-          >group_add</i
-        >
-        <span class="mdc-button__label">Create room</span>
-      </button>
-      <button class="mdc-button mdc-button--raised" disabled id="joinBtn">
-        <i class="material-icons mdc-button__icon" aria-hidden="true">group</i>
-        <span class="mdc-button__label">Join room</span>
-      </button>
-      <button class="mdc-button mdc-button--raised" disabled id="hangupBtn">
-        <i class="material-icons mdc-button__icon" aria-hidden="true">close</i>
-        <span class="mdc-button__label">Hangup</span>
-      </button>
+      <div id="buttons-inner">
+        <button class="mdc-button mdc-button--raised" id="cameraBtn">
+          <i class="material-icons mdc-button__icon" aria-hidden="true"
+            >perm_camera_mic</i
+          >
+          <span class="mdc-button__label">Open camera & microphone</span>
+        </button>
+        <button class="mdc-button mdc-button--raised" id="createBtn">
+          <i class="material-icons mdc-button__icon" aria-hidden="true"
+            >group_add</i
+          >
+          <span class="mdc-button__label">Create room</span>
+        </button>
+        <button class="mdc-button mdc-button--raised" id="joinBtn">
+          <i class="material-icons mdc-button__icon" aria-hidden="true"
+            >group</i
+          >
+          <span class="mdc-button__label">Join room</span>
+        </button>
+      </div>
+
       <div>
         <span id="currentRoom"></span>
       </div>
@@ -52,6 +53,7 @@
 
     <div id="video-container-outer">
       <div id="video-container-inner">
+        <img id="pip" src="img/picture-in-picture.png" alt="" />
         <video id="localVideo" muted autoplay playsinline></video>
         <video id="remoteVideo" autoplay playsinline></video>
       </div>
@@ -90,9 +92,9 @@
             Enter ID for room to join:
             <div class="mdc-text-field">
               <input type="text" id="room-id" class="mdc-text-field__input" />
-              <label class="mdc-floating-label" for="my-text-field"
+              <!-- <label class="mdc-floating-label" for="my-text-field"
                 >Room ID</label
-              >
+              > -->
               <div class="mdc-line-ripple"></div>
             </div>
           </div>

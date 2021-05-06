@@ -28,11 +28,13 @@ const sendButton = document.querySelector("button#sendButton");
 const closeButton = document.querySelector("button#closeButton");
 //end data transfer vars
 
+const pipIcon = document.querySelector("img#pip");
+
 //---------------------
 
 function init() {
   document.querySelector("#cameraBtn").addEventListener("click", openUserMedia);
-  document.querySelector("#hangupBtn").addEventListener("click", hangUp);
+  // document.querySelector("#hangupBtn").addEventListener("click", hangUp);
   document.querySelector("#createBtn").addEventListener("click", createRoom);
   document.querySelector("#joinBtn").addEventListener("click", joinRoom);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector("#room-dialog"));
@@ -112,7 +114,7 @@ async function createRoom() {
     "#currentRoom"
   ).innerText = `Current room is ${roomRef.id} - You are the caller!`;
   //diplaying room id to user that created room
-
+  document.querySelector("#buttons-inner").style.display = "none";
   //end code for creating room
 
   //start code for handling incoming remote "join" requests
@@ -258,6 +260,10 @@ async function joinRoomById(roomId) {
 
   sendChannel.onopen = onSendChannelStateChange;
   sendChannel.onclose = onSendChannelStateChange;
+
+  console.log("end of joinroombyId");
+
+  // document.querySelector("#video-container-inner").requestFullscreen();
 }
 
 //---------------------
@@ -300,10 +306,22 @@ async function openUserMedia(e) {
   //adding remote (incoming) stream to other html video element
 
   // console.log("Stream:", document.querySelector("#localVideo").srcObject);
-  document.querySelector("#cameraBtn").disabled = true;
+  document.querySelector("#cameraBtn").style.display = "none";
   document.querySelector("#joinBtn").disabled = false;
   document.querySelector("#createBtn").disabled = false;
-  document.querySelector("#hangupBtn").disabled = false;
+  // document.querySelector("#hangupBtn").disabled = false;
+
+  // let the jank begin
+
+  // document
+  //   .querySelector("#video-container-inner")
+  //   .addEventListener("mouseover", showPipIcon);
+
+  // let localVideoFadeInterval = setTimeout(function () {
+  //   document.querySelector("#localVideo").style.display = "none";
+  //   document.querySelector("#video-container-inner").classList.add("active");
+  //   pipIcon.addEventListener("click", checkLocalVideo);
+  // }, 5000);
 }
 
 //---------------------
@@ -359,6 +377,11 @@ function registerPeerConnectionListeners() {
 
   peerConnection.addEventListener("connectionstatechange", () => {
     console.log(`Connection state change: ${peerConnection.connectionState}`);
+
+    if (peerConnection.connectionState == "connected") {
+      document.querySelector("#buttons").style.display = "none";
+      // document.querySelector("#video-container-inner").style.height = "100%";
+    }
   });
 
   peerConnection.addEventListener("signalingstatechange", () => {
@@ -379,18 +402,18 @@ init();
 //start data transfer helper functions
 
 function onSendChannelStateChange() {
-  const readyState = sendChannel.readyState;
-  console.log("Send channel state is: " + readyState);
-  if (readyState === "open") {
-    dataChannelSend.disabled = false;
-    dataChannelSend.focus();
-    sendButton.disabled = false;
-    closeButton.disabled = false;
-  } else {
-    dataChannelSend.disabled = true;
-    sendButton.disabled = true;
-    closeButton.disabled = true;
-  }
+  // const readyState = sendChannel.readyState;
+  // console.log("Send channel state is: " + readyState);
+  // if (readyState === "open") {
+  //   dataChannelSend.disabled = false;
+  //   dataChannelSend.focus();
+  //   sendButton.disabled = false;
+  //   closeButton.disabled = false;
+  // } else {
+  //   dataChannelSend.disabled = true;
+  //   sendButton.disabled = true;
+  //   closeButton.disabled = true;
+  // }
 }
 
 function receiveChannelCallback(event) {
@@ -416,3 +439,20 @@ function sendData() {
   sendChannel.send(data);
   console.log("Sent Data: " + data);
 }
+
+// this is where the janky stuff starts
+
+// function showPipIcon() {
+//   pipIcon.style.display = "block";
+//   var pipFadeInterval = setTimeout(function () {
+//     pipIcon.style.display = "none";
+//     clearInterval(pipFadeInterval);
+//   }, 3000);
+// }
+
+// function checkLocalVideo() {
+//   document.querySelector("#localVideo").style.display = "block";
+//   let localVideoFade = setTimeout(function () {
+//     document.querySelector("#localVideo").style.display = "none";
+//   }, 3000);
+// }
