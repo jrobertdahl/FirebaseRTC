@@ -1,13 +1,5 @@
+import { iceConfiguration } from "./iceConfiguration.js";
 import { openUserMedia } from "./openUserMedia.js";
-
-const configuration = {
-  iceServers: [
-    {
-      urls: ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"],
-    },
-  ],
-  iceCandidatePoolSize: 10,
-};
 
 let peerConnection = null;
 let localStream = null;
@@ -22,18 +14,12 @@ function init() {
   document.querySelector("#cameraBtn").addEventListener("click", function () {
     openUserMedia().then((stream) => {
       document.querySelector("#localVideo").srcObject = localStream = stream;
-      console.log(localStream);
     });
   });
   // document.querySelector("#hangupBtn").addEventListener("click", hangUp);
   document.querySelector("#createBtn").addEventListener("click", createRoom);
   document.querySelector("#joinBtn").addEventListener("click", joinRoom);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector("#room-dialog"));
-
-  remoteStream = new MediaStream();
-  //setting up remote (incoming) stream to eventually be included in peer connection
-
-  document.querySelector("#remoteVideo").srcObject = remoteStream;
 }
 
 //---------------------
@@ -42,13 +28,21 @@ async function createRoom() {
   document.querySelector("#createBtn").disabled = true;
   document.querySelector("#joinBtn").disabled = true;
 
+  remoteStream = new MediaStream();
+  //setting up remote (incoming) stream to eventually be included in peer connection
+
+  document.querySelector("#remoteVideo").srcObject = remoteStream;
+
   //connect to firebase database (credentials and details in /__/firebase/init.js)
 
   const roomRef = await db.collection("rooms").doc();
   //get existing rooms documents
 
-  console.log("Create PeerConnection with configuration: ", configuration);
-  peerConnection = new RTCPeerConnection(configuration);
+  console.log(
+    "Create PeerConnection with iceConfiguration: ",
+    iceConfiguration
+  );
+  peerConnection = new RTCPeerConnection(iceConfiguration);
   //creating peer connection object, passing config
 
   registerPeerConnectionListeners();
@@ -170,7 +164,10 @@ function joinRoom() {
 //---------------------
 
 async function joinRoomById(roomId) {
-  //connect to firestore db
+  remoteStream = new MediaStream();
+  //setting up remote (incoming) stream to eventually be included in peer connection
+
+  document.querySelector("#remoteVideo").srcObject = remoteStream;
 
   const roomRef = db.collection("rooms").doc(`${roomId}`);
   //find the specific room by roomID
@@ -180,8 +177,11 @@ async function joinRoomById(roomId) {
   //"get"(?) the room
 
   if (roomSnapshot.exists) {
-    console.log("Create PeerConnection with configuration: ", configuration);
-    peerConnection = new RTCPeerConnection(configuration);
+    console.log(
+      "Create PeerConnection with iceConfiguration: ",
+      iceConfiguration
+    );
+    peerConnection = new RTCPeerConnection(iceConfiguration);
 
     registerPeerConnectionListeners();
     localStream.getTracks().forEach((track) => {
