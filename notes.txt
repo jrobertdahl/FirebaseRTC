@@ -1,0 +1,87 @@
+from openUserMedia:
+remoteStream = new MediaStream();
+  //setting up remote (incoming) stream to eventually be included in peer connection
+
+  document.querySelector("#remoteVideo").srcObject = remoteStream;
+  //adding remote (incoming) stream to other html video element
+
+  // console.log("Stream:", document.querySelector("#localVideo").srcObject);
+  document.querySelector("#cameraBtn").style.display = "none";
+  document.querySelector("#joinBtn").disabled = false;
+  document.querySelector("#createBtn").disabled = false;
+
+
+data transfer stuff:
+
+global:
+//start data transfer vars
+
+// let sendChannel = null;
+
+// const dataChannelSend = document.querySelector("textarea#dataChannelSend");
+// const dataChannelReceive = document.querySelector(
+//   "textarea#dataChannelReceive"
+// );
+// const sendButton = document.querySelector("button#sendButton");
+// const closeButton = document.querySelector("button#closeButton");
+//end data transfer vars
+from init:
+// sendButton.onclick = sendData;
+
+from createRoom:
+// sendChannel = peerConnection.createDataChannel("sendDataChannel");
+
+// peerConnection.ondatachannel = receiveChannelCallback;
+
+// sendChannel.onopen = onSendChannelStateChange;
+// sendChannel.onclose = onSendChannelStateChange;
+
+from joinRoomById:
+// sendChannel = peerConnection.createDataChannel("sendDataChannel");
+
+// peerConnection.ondatachannel = receiveChannelCallback;
+
+// sendChannel.onopen = onSendChannelStateChange;
+// sendChannel.onclose = onSendChannelStateChange;
+
+data transfer functions:
+//start data transfer helper functions
+
+// function onSendChannelStateChange() {
+//   const readyState = sendChannel.readyState;
+//   console.log("Send channel state is: " + readyState);
+//   if (readyState === "open") {
+//     dataChannelSend.disabled = false;
+//     dataChannelSend.focus();
+//     sendButton.disabled = false;
+//     closeButton.disabled = false;
+//   } else {
+//     dataChannelSend.disabled = true;
+//     sendButton.disabled = true;
+//     closeButton.disabled = true;
+//   }
+// }
+
+// function receiveChannelCallback(event) {
+//   console.log("Receive Channel Callback");
+//   receiveChannel = event.channel;
+//   receiveChannel.onmessage = onReceiveMessageCallback;
+//   receiveChannel.onopen = onReceiveChannelStateChange;
+//   receiveChannel.onclose = onReceiveChannelStateChange;
+// }
+
+// function onReceiveMessageCallback(event) {
+//   console.log("Received Message");
+//   dataChannelReceive.value = event.data;
+// }
+
+// function onReceiveChannelStateChange() {
+//   const readyState = receiveChannel.readyState;
+//   console.log(`Receive channel state is: ${readyState}`);
+// }
+
+// function sendData() {
+//   const data = dataChannelSend.value;
+//   sendChannel.send(data);
+//   console.log("Sent Data: " + data);
+// }

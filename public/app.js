@@ -1,5 +1,4 @@
-mdc.ripple.MDCRipple.attachTo(document.querySelector(".mdc-button"));
-//mdc stuff is google's material design framework. not needed.
+import { openUserMedia } from "./openUserMedia.js";
 
 const configuration = {
   iceServers: [
@@ -15,31 +14,26 @@ let localStream = null;
 let remoteStream = null;
 let roomDialog = null;
 let roomId = null;
-
-//start data transfer vars
-
-let sendChannel = null;
-
-const dataChannelSend = document.querySelector("textarea#dataChannelSend");
-const dataChannelReceive = document.querySelector(
-  "textarea#dataChannelReceive"
-);
-const sendButton = document.querySelector("button#sendButton");
-const closeButton = document.querySelector("button#closeButton");
-//end data transfer vars
-
-const pipIcon = document.querySelector("img#pip");
+const db = firebase.firestore();
 
 //---------------------
 
 function init() {
-  document.querySelector("#cameraBtn").addEventListener("click", openUserMedia);
+  document.querySelector("#cameraBtn").addEventListener("click", function () {
+    openUserMedia().then((stream) => {
+      document.querySelector("#localVideo").srcObject = localStream = stream;
+      console.log(localStream);
+    });
+  });
   // document.querySelector("#hangupBtn").addEventListener("click", hangUp);
   document.querySelector("#createBtn").addEventListener("click", createRoom);
   document.querySelector("#joinBtn").addEventListener("click", joinRoom);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector("#room-dialog"));
 
-  // sendButton.onclick = sendData;
+  remoteStream = new MediaStream();
+  //setting up remote (incoming) stream to eventually be included in peer connection
+
+  document.querySelector("#remoteVideo").srcObject = remoteStream;
 }
 
 //---------------------
@@ -48,7 +42,6 @@ async function createRoom() {
   document.querySelector("#createBtn").disabled = true;
   document.querySelector("#joinBtn").disabled = true;
 
-  const db = firebase.firestore();
   //connect to firebase database (credentials and details in /__/firebase/init.js)
 
   const roomRef = await db.collection("rooms").doc();
@@ -57,10 +50,6 @@ async function createRoom() {
   console.log("Create PeerConnection with configuration: ", configuration);
   peerConnection = new RTCPeerConnection(configuration);
   //creating peer connection object, passing config
-
-  sendChannel = peerConnection.createDataChannel("sendDataChannel");
-
-  peerConnection.ondatachannel = receiveChannelCallback;
 
   registerPeerConnectionListeners();
   //function that sets up loggin various signaling/ice state changes
@@ -152,9 +141,6 @@ async function createRoom() {
   //end code for listening for remote ICE candidates
 
   //end code for handling incoming remote "join" requests
-
-  sendChannel.onopen = onSendChannelStateChange;
-  sendChannel.onclose = onSendChannelStateChange;
 }
 
 //---------------------
@@ -184,7 +170,6 @@ function joinRoom() {
 //---------------------
 
 async function joinRoomById(roomId) {
-  const db = firebase.firestore();
   //connect to firestore db
 
   const roomRef = db.collection("rooms").doc(`${roomId}`);
@@ -197,10 +182,6 @@ async function joinRoomById(roomId) {
   if (roomSnapshot.exists) {
     console.log("Create PeerConnection with configuration: ", configuration);
     peerConnection = new RTCPeerConnection(configuration);
-
-    sendChannel = peerConnection.createDataChannel("sendDataChannel");
-
-    peerConnection.ondatachannel = receiveChannelCallback;
 
     registerPeerConnectionListeners();
     localStream.getTracks().forEach((track) => {
@@ -224,6 +205,7 @@ async function joinRoomById(roomId) {
       console.log("Got remote track:", event.streams[0]);
       event.streams[0].getTracks().forEach((track) => {
         console.log("Add a track to the remoteStream:", track);
+        console.log(`remoteStream is ${remoteStream}`);
         remoteStream.addTrack(track);
       });
     });
@@ -258,71 +240,10 @@ async function joinRoomById(roomId) {
     //end code for listening for remote ICE candidates
   }
 
-  sendChannel.onopen = onSendChannelStateChange;
-  sendChannel.onclose = onSendChannelStateChange;
-
   console.log("end of joinroombyId");
-
-  // document.querySelector("#video-container-inner").requestFullscreen();
 }
 
 //---------------------
-
-async function openUserMedia(e) {
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: {
-      //for chrome
-      mandatory: {
-        // autoGainControl: "false",
-        echoCancellation: "true", //I think this needs to be set to true
-        googAutoGainControl: "false", //not sure about this one
-        googEchoCancellation: "true", //I think this needs to be set to true
-        googNoiseSuppression: "false", //sounds better set to false
-        googHighpassFilter: "true",
-      },
-      optional: [],
-      //for ff
-      // audio : {
-      //   "mandatory": {
-      //       "echoCancellation": "true"
-      //   }
-      // }
-    },
-  });
-  console.log(stream.getAudioTracks()[0].getSettings());
-  //video and audio stream from local device
-
-  document.querySelector("#localVideo").srcObject = stream;
-  //displays local stream in html to self video element
-
-  localStream = stream;
-  //assigning to global const to be later added to peer connection
-
-  remoteStream = new MediaStream();
-  //setting up remote (incoming) stream to eventually be included in peer connection
-
-  document.querySelector("#remoteVideo").srcObject = remoteStream;
-  //adding remote (incoming) stream to other html video element
-
-  // console.log("Stream:", document.querySelector("#localVideo").srcObject);
-  document.querySelector("#cameraBtn").style.display = "none";
-  document.querySelector("#joinBtn").disabled = false;
-  document.querySelector("#createBtn").disabled = false;
-  // document.querySelector("#hangupBtn").disabled = false;
-
-  // let the jank begin
-
-  // document
-  //   .querySelector("#video-container-inner")
-  //   .addEventListener("mouseover", showPipIcon);
-
-  // let localVideoFadeInterval = setTimeout(function () {
-  //   document.querySelector("#localVideo").style.display = "none";
-  //   document.querySelector("#video-container-inner").classList.add("active");
-  //   pipIcon.addEventListener("click", checkLocalVideo);
-  // }, 5000);
-}
 
 //---------------------
 
@@ -350,7 +271,6 @@ async function hangUp(e) {
 
   // Delete room on hangup
   if (roomId) {
-    const db = firebase.firestore();
     const roomRef = db.collection("rooms").doc(roomId);
     const calleeCandidates = await roomRef.collection("calleeCandidates").get();
     calleeCandidates.forEach(async (candidate) => {
@@ -380,7 +300,6 @@ function registerPeerConnectionListeners() {
 
     if (peerConnection.connectionState == "connected") {
       document.querySelector("#buttons").style.display = "none";
-      // document.querySelector("#video-container-inner").style.height = "100%";
     }
   });
 
@@ -398,61 +317,3 @@ function registerPeerConnectionListeners() {
 //---------------------
 
 init();
-
-//start data transfer helper functions
-
-function onSendChannelStateChange() {
-  // const readyState = sendChannel.readyState;
-  // console.log("Send channel state is: " + readyState);
-  // if (readyState === "open") {
-  //   dataChannelSend.disabled = false;
-  //   dataChannelSend.focus();
-  //   sendButton.disabled = false;
-  //   closeButton.disabled = false;
-  // } else {
-  //   dataChannelSend.disabled = true;
-  //   sendButton.disabled = true;
-  //   closeButton.disabled = true;
-  // }
-}
-
-function receiveChannelCallback(event) {
-  console.log("Receive Channel Callback");
-  receiveChannel = event.channel;
-  receiveChannel.onmessage = onReceiveMessageCallback;
-  receiveChannel.onopen = onReceiveChannelStateChange;
-  receiveChannel.onclose = onReceiveChannelStateChange;
-}
-
-function onReceiveMessageCallback(event) {
-  console.log("Received Message");
-  dataChannelReceive.value = event.data;
-}
-
-function onReceiveChannelStateChange() {
-  const readyState = receiveChannel.readyState;
-  console.log(`Receive channel state is: ${readyState}`);
-}
-
-function sendData() {
-  const data = dataChannelSend.value;
-  sendChannel.send(data);
-  console.log("Sent Data: " + data);
-}
-
-// this is where the janky stuff starts
-
-// function showPipIcon() {
-//   pipIcon.style.display = "block";
-//   var pipFadeInterval = setTimeout(function () {
-//     pipIcon.style.display = "none";
-//     clearInterval(pipFadeInterval);
-//   }, 3000);
-// }
-
-// function checkLocalVideo() {
-//   document.querySelector("#localVideo").style.display = "block";
-//   let localVideoFade = setTimeout(function () {
-//     document.querySelector("#localVideo").style.display = "none";
-//   }, 3000);
-// }
