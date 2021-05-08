@@ -12,15 +12,16 @@
     <!-- initialize the SDK after all desired features are loaded -->
     <script defer src="/__/firebase/init.js"></script>
 
+    <script src="https://www.gstatic.com/firebasejs/ui/4.8.0/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet"
+    href="https://www.gstatic.com/firebasejs/ui/4.8.0/firebase-ui-auth.css" / >
+
     <link rel="stylesheet" type="text/css" href="css/main.css" />
   </head>
   <body>
-    <h1>It's lesson time baby!</h1>
-    <a id="lesson-logged-out-link" href="/lesson-logged_out.html"
-      >Go to Lesson</a
-    >
-    <a id="lesson-logged-in-link" href="/lesson-logged_in.html">Go to Lesson</a>
-    <a id="login-link" href="/login.html">Instructor Login</a>
-    <script defer type="module" src="js/landing-page.js"></script>
+    <h1>Instructor Login</h1>
+    <div id="firebaseui-auth-container"></div>
+    <div id="loader">Loading...</div>
+    <script defer type="module" src="js/login-page.js"></script>
   </body>
 </html>

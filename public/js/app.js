@@ -10,6 +10,17 @@ const db = firebase.firestore();
 //---------------------
 
 function init() {
+  firebase.auth().onAuthStateChanged(function (user) {
+    if (user) {
+      console.log("user is logged in");
+      console.log(user);
+      document.querySelector("#joinBtn").style.display = "none";
+    } else {
+      console.log("no user logged in");
+      document.querySelector("#createBtn").style.display = "none";
+    }
+  });
+
   document.querySelector("#cameraBtn").addEventListener("click", function () {
     openUserMedia().then((stream) => {
       document.querySelector("#localVideo").srcObject = localStream = stream;
