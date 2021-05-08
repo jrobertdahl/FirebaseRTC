@@ -63,9 +63,7 @@ async function createRoom() {
     }
   });
 
-  document.querySelector(
-    "#currentRoom"
-  ).innerText = `Current room is ${roomRef.id} - You are the caller!`;
+  document.querySelector("#currentRoom").innerText = `${roomRef.id}`;
   //diplaying room id to user that created room
   document.querySelector("#buttons-inner").style.display = "none";
 }
@@ -82,9 +80,6 @@ function showJoinModal() {
     "click",
     async () => {
       roomId = document.querySelector("#room-id").value;
-      document.querySelector(
-        "#currentRoom"
-      ).innerText = `Current room is ${roomId} - You are the callee!`;
       await joinRoomById(roomId);
     },
     { once: true }
